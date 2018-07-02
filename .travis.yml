@@ -1,0 +1,19 @@
+os: linux
+dist: trusty
+language: python
+python:
+  - 2.7
+  - 3.6
+cache:
+  - pip
+sudo: false
+
+install:
+  - pip install opencv-python
+  - pip install Cython
+  - pip install .
+
+script:
+  - pip install flake8 pytest
+  - flake8 .
+
