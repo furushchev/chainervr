@@ -6,8 +6,7 @@ import chainer
 import chainer.links as L
 import chainer.functions as F
 
-from .convolution_lstm_2d import ConvolutionLSTM2D
-from .layer_normalization import LayerNormalization
+from ... import links
 
 
 class DeepEpisodicMemoryEncoder(chainer.Chain):
@@ -17,32 +16,32 @@ class DeepEpisodicMemoryEncoder(chainer.Chain):
                  dropout_ratio=0.1):
         super(DeepEpisodicMemoryEncoder, self).__init__(
             conv1=L.Convolution2D(3, 32, 5, stride=2, pad=2),
-            conv_norm1=LayerNormalization(),
-            lstm1=ConvolutionLSTM2D(32, 32, 5),
-            lstm_norm1=LayerNormalization(),
+            conv_norm1=links.LayerNormalization(),
+            lstm1=links.ConvolutionLSTM2D(32, 32, 5),
+            lstm_norm1=links.LayerNormalization(),
             #
             conv2=L.Convolution2D(32, 32, 5, stride=2, pad=2),
-            conv_norm2=LayerNormalization(),
-            lstm2=ConvolutionLSTM2D(32, 32, 5),
-            lstm_norm2=LayerNormalization(),
+            conv_norm2=links.LayerNormalization(),
+            lstm2=links.ConvolutionLSTM2D(32, 32, 5),
+            lstm_norm2=links.LayerNormalization(),
             #
             conv3=L.Convolution2D(32, 32, 5, stride=2, pad=2),
-            conv_norm3=LayerNormalization(),
-            lstm3=ConvolutionLSTM2D(32, 32, 3),
-            lstm_norm3=LayerNormalization(),
+            conv_norm3=links.LayerNormalization(),
+            lstm3=links.ConvolutionLSTM2D(32, 32, 3),
+            lstm_norm3=links.LayerNormalization(),
             #
             conv4=L.Convolution2D(32, 32, 3, stride=2, pad=1),
-            conv_norm4=LayerNormalization(),
-            lstm4=ConvolutionLSTM2D(32, 64, 3),
-            lstm_norm4=LayerNormalization(),
+            conv_norm4=links.LayerNormalization(),
+            lstm4=links.ConvolutionLSTM2D(32, 64, 3),
+            lstm_norm4=links.LayerNormalization(),
             #
             conv5=L.Convolution2D(64, 64, 3, stride=2, pad=1),
-            conv_norm5=LayerNormalization(),
-            lstm5=ConvolutionLSTM2D(64, 64, 3),
-            lstm_norm5=LayerNormalization(),
+            conv_norm5=links.LayerNormalization(),
+            lstm5=links.ConvolutionLSTM2D(64, 64, 3),
+            lstm_norm5=links.LayerNormalization(),
             #
             fc_conv=L.Convolution2D(64, fc_channels, 4, stride=1, pad=0),
-            fc_lstm=ConvolutionLSTM2D(fc_channels, fc_lstm_channels, 1),
+            fc_lstm=links.ConvolutionLSTM2D(fc_channels, fc_lstm_channels, 1),
         )
         self.dropout_ratio = dropout_ratio
         self.reset_state()

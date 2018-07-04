@@ -4,7 +4,7 @@
 
 import chainer
 import chainer.functions as F
-from .. import functions
+from ... import functions
 
 
 class DeepEpisodicMemoryTrainChain(chainer.Chain):
@@ -12,7 +12,7 @@ class DeepEpisodicMemoryTrainChain(chainer.Chain):
        https://arxiv.org/pdf/1801.04134.pdf
     """
 
-    def __init__(self, model, loss_func="mse", mse_ratio=0.6):
+    def __init__(self, model, loss_func="mse", mse_ratio=0.6, resize_images=None):
         super(DeepEpisodicMemoryTrainChain, self).__init__()
         with self.init_scope():
             self.model = model
@@ -26,9 +26,13 @@ class DeepEpisodicMemoryTrainChain(chainer.Chain):
             raise ValueError(
                 "mse_ratio '%s' must be from 0.0 to 1.0" % mse_ratio)
 
+        if resize_images is None:
+            resize_images = (128, 128)
+
         self.loss_func = loss_func
         self.mse_ratio = mse_ratio
         self.episode_size = self.model.episode_size
+        self.resize_images = resize_images
 
     def reset_state(self):
         self.model.reset_state()
@@ -36,6 +40,10 @@ class DeepEpisodicMemoryTrainChain(chainer.Chain):
     def __call__(self, x, t_reconst, t_pred):
         """x, t_reconst, t_pred: (B, C, H, W)"""
 
+        if self.resize_images:
+            x = F.resize_images(x, self.resize_images)
+            t_reconst = F.resize_images(t_reconst, self.resize_images)
+            t_pred = F.resize_images(t_pred, self.resize_images)
         pred, reconst, hidden = self.model(x)
 
         mse_loss = 0.

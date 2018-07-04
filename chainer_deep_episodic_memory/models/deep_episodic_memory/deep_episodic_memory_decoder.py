@@ -6,45 +6,44 @@ import chainer
 import chainer.links as L
 import chainer.functions as F
 
-from .convolution_lstm_2d import ConvolutionLSTM2D
-from .layer_normalization import LayerNormalization
+from ... import links
 
 
 class DeepEpisodicMemoryDecoder(chainer.Chain):
     def __init__(self, out_channels, fc_lstm_channels=1000,
                  dropout_ratio=0.1):
         super(DeepEpisodicMemoryDecoder, self).__init__(
-            fc_lstm=ConvolutionLSTM2D(
+            fc_lstm=links.ConvolutionLSTM2D(
                 fc_lstm_channels, fc_lstm_channels, 1, pad=0),
             fc_deconv=L.Deconvolution2D(
                 fc_lstm_channels, 64, 4, stride=1, pad=0),
             #
-            lstm1=ConvolutionLSTM2D(64, 64, 3),
-            lstm_norm1=LayerNormalization(),
+            lstm1=links.ConvolutionLSTM2D(64, 64, 3),
+            lstm_norm1=links.LayerNormalization(),
             deconv1=L.Deconvolution2D(
                 64, 64, 3, stride=2, pad=1, outsize=(8, 8)),
-            deconv_norm1=LayerNormalization(),
+            deconv_norm1=links.LayerNormalization(),
             #
-            lstm2=ConvolutionLSTM2D(64, 64, 3),
-            lstm_norm2=LayerNormalization(),
+            lstm2=links.ConvolutionLSTM2D(64, 64, 3),
+            lstm_norm2=links.LayerNormalization(),
             deconv2=L.Deconvolution2D(
                 64, 64, 3, stride=2, pad=1, outsize=(16, 16)),
-            deconv_norm2=LayerNormalization(),
+            deconv_norm2=links.LayerNormalization(),
             #
-            lstm3=ConvolutionLSTM2D(64, 32, 3),
-            lstm_norm3=LayerNormalization(),
+            lstm3=links.ConvolutionLSTM2D(64, 32, 3),
+            lstm_norm3=links.LayerNormalization(),
             deconv3=L.Deconvolution2D(
                 32, 32, 5, stride=2, pad=2, outsize=(32, 32)),
-            deconv_norm3=LayerNormalization(),
+            deconv_norm3=links.LayerNormalization(),
             #
-            lstm4=ConvolutionLSTM2D(32, 32, 5),
-            lstm_norm4=LayerNormalization(),
+            lstm4=links.ConvolutionLSTM2D(32, 32, 5),
+            lstm_norm4=links.LayerNormalization(),
             deconv4=L.Deconvolution2D(
                 32, 32, 5, stride=2, pad=2, outsize=(64, 64)),
-            deconv_norm4=LayerNormalization(),
+            deconv_norm4=links.LayerNormalization(),
             #
-            lstm5=ConvolutionLSTM2D(32, 32, 5),
-            lstm_norm5=LayerNormalization(),
+            lstm5=links.ConvolutionLSTM2D(32, 32, 5),
+            lstm_norm5=links.LayerNormalization(),
             deconv5=L.Deconvolution2D(
                 32, out_channels, 5, stride=2, pad=2, outsize=(128, 128)),
         )

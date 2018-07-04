@@ -4,3 +4,5 @@
 
 from .moving_mnist import MovingMnistDataset
 from .video import VideoDataset
+
+from .split_episode import SplitEpisode

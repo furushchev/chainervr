@@ -6,7 +6,8 @@ import chainer
 import chainer.links as L
 import chainer.functions as F
 
-from .. import links
+from .deep_episodic_memory_encoder import DeepEpisodicMemoryEncoder
+from .deep_episodic_memory_decoder import DeepEpisodicMemoryDecoder
 
 
 class DeepEpisodicMemory(chainer.Chain):
@@ -19,9 +20,9 @@ class DeepEpisodicMemory(chainer.Chain):
         super(DeepEpisodicMemory, self).__init__()
 
         if encoder_cls is None:
-            encoder_cls = links.DeepEpisodicMemoryEncoder
+            encoder_cls = DeepEpisodicMemoryEncoder
         if decoder_cls is None:
-            decoder_cls = links.DeepEpisodicMemoryDecoder
+            decoder_cls = DeepEpisodicMemoryDecoder
 
         with self.init_scope():
             self.encoder = encoder_cls(fc_lstm_channels=hidden_channels)

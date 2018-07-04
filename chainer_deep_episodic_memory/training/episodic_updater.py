@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+import numpy as np
 import chainer
 from chainer import training
 
@@ -19,9 +20,10 @@ class EpisodicUpdater(training.updaters.StandardUpdater):
         loss = 0
 
         in_data = next(train_iter)  # B x (NiCHW, label)
-        xs = [d[0] for d in in_data]  # use images only
-        dtype = xs[0].dtype
-        x = np.asarray([x[:model.episode_size+1] for x in xs], dtype=dtype)  # Ni -> N
+        if not isinstance(in_data[0], np.ndarray):
+            in_data = [d[0] for d in in_data]  # assume image is at first
+        dtype = in_data[0].dtype
+        x = np.asarray([x[:model.episode_size+1] for x in in_data], dtype=dtype)  # Ni -> N
         model.reset_state()
         x = x.transpose((1, 0, 2, 3, 4))  # NBCHW
         episode_size = x.shape[0] - 1

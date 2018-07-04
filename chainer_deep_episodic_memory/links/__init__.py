@@ -4,5 +4,3 @@
 
 from .convolution_lstm_2d import ConvolutionLSTM2D
 from .layer_normalization import LayerNormalization
-from .deep_episodic_memory_encoder import DeepEpisodicMemoryEncoder
-from .deep_episodic_memory_decoder import DeepEpisodicMemoryDecoder

@@ -5,21 +5,16 @@
 from setuptools import find_packages
 from setuptools import setup
 
-import chainer_deep_episodic_memory as pkg
-
-author_raw = pkg.__author__.replace("<", "").replace(">", "").split()
-author = " ".join(author_raw[:-1]).strip()
-author_email = author_raw[-1].strip()
 
 setup(
     name='chainer-deep-episodic-memory',
-    version=pkg.__version__,
+    version="0.1.0",
     packages=find_packages(),
     include_package_data=True,
     install_requires=open('requirements.txt').readlines(),
-    author=author,
-    author_email=author_email,
+    author="Yuki Furuta",
+    author_email="furushchev@jsk.imi.i.u-tokyo.ac.jp",
     description="Chainer implementation of Deep Episodic Memory",
-    url=pkg.__url__,
+    url="https://github.com/furushchev/chainer-deep-episodic-memory",
     license="MIT",
 )
