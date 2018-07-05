@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 
 import click
 import numpy as np
-import multiprocessing as mp
 
 import chainer
 
@@ -39,24 +38,9 @@ def extract(in_data, gpu):
     return in_data
 
 
-@click.command()
-@click.argument("model_path")
-@click.option("--gpu", "-g", type=int, default=-1)
-@click.option("--out", "-o", type=str, default="conv_lstm_predict")
-@click.option("--split", type=str, default="test")
-@click.option("--disable-predict", is_flag=True)
-@click.option("--in-episode", type=int, default=5)
-@click.option("--out-episode", type=int, default=5)
-def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episode):
-
-    info("Loading model from %s" % model_path)
-
-    model = chainervr.models.ConvLSTM(
-        n_channels=1, patch_size=(64, 64),
-        predict=not disable_predict,
-        in_episodes=in_episode, out_episodes=out_episode)
-
-    model.reset_state()
+def predict(model, model_path, gpu,
+            in_episodes, out_episodes, channels_num,
+            out, split, start_from, images_num):
     if gpu >= 0:
         info("Using GPU %d" % gpu)
         chainer.cuda.get_device_from_id(gpu).use()
@@ -68,21 +52,24 @@ def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episod
 
     info("Loading dataset")
 
-    dataset = chainervr.datasets.MovingMnistDataset(split=split, channels_num=1)
+    dataset = chainervr.datasets.MovingMnistDataset(split=split, channels_num=channels_num)
 
     os.makedirs(out, exist_ok=True)
+
+    chainer.config.train = False
 
     info("Forwarding")
 
     xp = model.xp
-    for n in range(100):
+    for n in range(start_from, images_num):
         data = dataset[n]
-        in_data, next_data = data[:in_episode], data[in_episode:in_episode+out_episode]
+        in_data, next_data = data[:in_episodes], data[in_episodes:in_episodes+out_episodes]
         in_data, next_data = in_data[np.newaxis, :], next_data[np.newaxis, :]
 
-        with chainer.cuda.get_device_from_id(gpu):
-            in_data = chainer.Variable(in_data)
-            in_data.to_gpu()
+        in_data = chainer.Variable(in_data)
+        if gpu >= 0:
+            with chainer.cuda.get_device_from_id(gpu):
+                in_data.to_gpu()
 
         reconst, pred = model(in_data)
 
@@ -117,7 +104,3 @@ def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episod
         plt.savefig(out_path, bbox_inches="tight", dpi=160)
         info("saved to %s" % out_path)
         plt.close(fig)
-
-
-if __name__ == '__main__':
-    predict()

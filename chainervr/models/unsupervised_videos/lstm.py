@@ -8,10 +8,10 @@ import chainer.functions as F
 import chainer.links as L
 
 
-class UnsupervisedLearningLSTM(chainer.Chain):
+class RPLSTM(chainer.Chain):
     def __init__(self, n_channels, patch_size, n_layers=None, n_hidden=None, predict=True,
                  in_episodes=None, out_episodes=None):
-        super(UnsupervisedLearningLSTM, self).__init__()
+        super(RPLSTM, self).__init__()
 
         if n_layers is None:
             n_layers = 1
@@ -124,48 +124,3 @@ class UnsupervisedLearningLSTM(chainer.Chain):
             pred_imgs = F.concat(pred_imgs, axis=1)  # BFCHW
 
         return reconst_imgs, pred_imgs
-
-
-class UnsupervisedLearningTrainChain(chainer.Chain):
-    def __init__(self, model, ratio=None, scale=None):
-        super(UnsupervisedLearningTrainChain, self).__init__()
-
-        with self.init_scope():
-            self.model = model
-
-        if ratio is None:
-            ratio = 0.5
-        if scale is None:
-            scale = 10.0
-        self.ratio = ratio
-        self.scale = scale
-
-    def __call__(self, x, t):
-        xp = self.xp
-        r, p = self.model(x)
-
-        rl, pl = 0.0, 0.0
-
-        assert t.shape[1] == self.model.out_episodes
-
-        if x.dtype == xp.int32:
-            # for int
-            rl = F.softmax_cross_entropy(x, r)
-            if self.model.predict:
-                pl = F.softmax_cross_entropy(t, p)
-        else:
-            # for float
-            rl = F.mean_squared_error(x, r)
-            if self.model.predict:
-                pl = F.mean_squared_error(t, p)
-
-        loss = rl * self.ratio + pl * (1.0 - self.ratio)
-        loss *= self.scale
-
-        reporter.report({
-            "loss/reconst": rl,
-            "loss/pred": pl,
-            "loss": loss
-        }, self)
-
-        return loss

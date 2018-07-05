@@ -6,11 +6,7 @@ import os
 if not os.getenv("DISPLAY", None):
     import matplotlib
     matplotlib.use("Agg")
-
 import click
-import numpy as np
-import multiprocessing as mp
-
 import chainer
 from chainer import serializers
 from chainer import training
@@ -28,33 +24,10 @@ def info(msg):
     click.secho(msg, fg="green")
 
 
-@click.command()
-@click.option("--batch-size", type=int, default=16)
-@click.option("--max-iter", type=int, default=100000)
-@click.option("--gpu", type=int, default=-1)
-@click.option("--multi-gpu", is_flag=True)
-@click.option("--disable-predict", is_flag=True)
-@click.option("--out", type=str, default="lstm_results")
-@click.option("--layer-num", type=int, default=2)
-@click.option("--in-episodes", type=int, default=5)
-@click.option("--out-episodes", type=int, default=5)
-@click.option("--log-interval", type=int, default=10)
-@click.option("--snapshot-interval", type=int, default=1000)
-@click.option("--resume", type=str, default="")
-def train(batch_size, max_iter,
+def train(model, train_chain, channels_num, in_episodes, out_episodes,
           gpu, multi_gpu, out,
-          disable_predict,
-          layer_num, in_episodes, out_episodes,
-          log_interval, snapshot_interval, resume):
-    info("Loading model")
-
-    model = chainervr.models.UnsupervisedLearningLSTM(
-        n_channels=1, n_size=(64, 64),
-        n_layers=layer_num, predict=not disable_predict)
-    train_chain = chainervr.models.EpisodicTrainChain(
-        model, ratio=0.5)
-
-    model.reset_state()
+          batch_size, max_iter, resume,
+          log_interval, snapshot_interval):
 
     comm = None
     if multi_gpu:
@@ -75,11 +48,11 @@ def train(batch_size, max_iter,
     if not multi_gpu or comm.rank == 0:
         train_data = chainer.datasets.TransformDataset(
             chainervr.datasets.MovingMnistDataset(
-                split="train", channels_num=1),
+                split="train", channels_num=channels_num),
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
         test_data = chainer.datasets.TransformDataset(
             chainervr.datasets.MovingMnistDataset(
-                split="test", channels_num=1),
+                split="test", channels_num=channels_num),
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
     else:
         train_data = test_data = None
@@ -149,6 +122,3 @@ def train(batch_size, max_iter,
 
     info("Done")
 
-
-if __name__ == '__main__':
-    train()
