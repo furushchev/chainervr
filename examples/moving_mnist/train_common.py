@@ -6,6 +6,7 @@ import os
 if not os.getenv("DISPLAY", None):
     import matplotlib
     matplotlib.use("Agg")
+import multiprocessing as mp
 import click
 import chainer
 from chainer import serializers

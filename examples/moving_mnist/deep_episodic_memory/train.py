@@ -5,6 +5,7 @@
 import click
 import os.path as osp
 import sys
+import chainer.functions as F
 import chainervr
 
 _THIS_DIR = osp.dirname(osp.abspath(__file__))
