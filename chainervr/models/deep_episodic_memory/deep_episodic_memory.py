@@ -15,26 +15,22 @@ class DeepEpisodicMemory(chainer.Chain):
        https://arxiv.org/pdf/1801.04134.pdf
     """
 
-    def __init__(self, hidden_channels, out_channels,
-                 encoder_cls=None, decoder_cls=None, episode_size=None):
+    def __init__(self, hidden_channels=None, num_episodes=None, dropout=None, noise_sigma=None):
         super(DeepEpisodicMemory, self).__init__()
 
-        if encoder_cls is None:
-            encoder_cls = DeepEpisodicMemoryEncoder
-        if decoder_cls is None:
-            decoder_cls = DeepEpisodicMemoryDecoder
+        if noise_sigma is None:
+            noise_sigma = 0.1
 
         with self.init_scope():
-            self.encoder = encoder_cls(fc_lstm_channels=hidden_channels)
-            self.decoder_reconst = decoder_cls(
-                fc_lstm_channels=hidden_channels, out_channels=out_channels)
-            self.decoder_pred = decoder_cls(
-                fc_lstm_channels=hidden_channels, out_channels=out_channels)
+            self.encoder = DeepEpisodicMemoryEncoder(
+                out_channels=hidden_channels, dropout=dropout)
+            self.decoder_reconst = DeepEpisodicMemoryDecoder(
+                in_channels=hidden_channels, dropout=dropout)
+            self.decoder_pred = DeepEpisodicMemoryDecoder(
+                in_channels=hidden_channels, dropout=dropout)
 
-        if episode_size is None:
-            episode_size = 5
-
-        self.episode_size = episode_size
+        self.noise_sigma = noise_sigma
+        self.num_episodes = num_episodes
 
     def reset_state(self):
         self.encoder.reset_state()
@@ -42,12 +38,51 @@ class DeepEpisodicMemory(chainer.Chain):
         self.decoder_pred.reset_state()
 
     def __call__(self, x):
-        """x: (B, C, H, W)"""
-        hidden = self.encoder(x)
-        reconst = self.decoder_reconst(hidden)
-        pred = self.decoder_pred(hidden)
-        with chainer.cuda.get_device_from_id(self._device_id):
-            pred_ret = chainer.Variable(pred.array.copy())
-            reconst_ret = chainer.Variable(reconst.array.copy())
-            hidden_ret = chainer.Variable(hidden.array.copy())
-        return pred_ret, reconst_ret, hidden_ret
+        """x: (B, N, C, H, W)"""
+
+        xp = self.xp
+        batch_size, nframes, nchannels = x.shape[:3]
+        in_size = x.shape[3:]
+
+        if self.num_episodes is not None:
+            self.num_episodes = nframes
+        else:
+            assert nframes == self.num_episodes
+
+        self.reset_state()
+
+        # BNCHW -> NBCHW
+        x = x.transpose((1, 0, 2, 3, 4))
+
+        reconst_imgs = []
+        pred_imgs = []
+        hidden = None
+        for i in range(self.num_episodes):
+            xi = x[i]  # BCHW
+            if in_size != (128, 128):
+                xi = F.resize_images(xi, (128, 128))
+            hi = self.encoder(xi)  # B, h_ch
+
+            # add gaussian noise
+            if chainer.config.train:
+                noise_sigma = xp.log(self.noise_sigma ** 2, dtype=hi.dtype)
+                ln_var = xp.ones_like(hi, dtype=hi.dtype) * noise_sigma
+                hi = F.gaussian(hi, ln_var)
+
+            ri = self.decoder_reconst(hi)  # B, CHW
+            if in_size != (128, 128):
+                ri = F.resize_images(ri, in_size)
+            reconst_imgs.append(ri[:, xp.newaxis])
+
+            pi = self.decoder_pred(hi)  # B, CHW
+            if in_size != (128, 128):
+                pi = F.resize_images(pi, in_size)
+            pred_imgs.append(pi[:, xp.newaxis])
+
+            if i == self.num_episodes - 1:
+                hidden = hi
+
+        reconst_imgs = F.concat(reconst_imgs, axis=1)
+        pred_imgs = F.concat(pred_imgs, axis=1)
+
+        return reconst_imgs, pred_imgs, hidden

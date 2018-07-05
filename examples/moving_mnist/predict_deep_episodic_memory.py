@@ -42,19 +42,16 @@ def extract(in_data, gpu):
 @click.command()
 @click.argument("model_path")
 @click.option("--gpu", "-g", type=int, default=-1)
-@click.option("--out", "-o", type=str, default="conv_lstm_predict")
+@click.option("--out", "-o", type=str, default="deep_episodic_memory_predict")
 @click.option("--split", type=str, default="test")
-@click.option("--disable-predict", is_flag=True)
-@click.option("--in-episode", type=int, default=5)
-@click.option("--out-episode", type=int, default=5)
-def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episode):
+@click.option("--hidden-channels", type=int, default=1000)
+@click.option("--num-episodes", type=int, default=5)
+def predict(model_path, gpu, out, split, hidden_channels, num_episodes):
 
     info("Loading model from %s" % model_path)
 
-    model = chainervr.models.ConvLSTM(
-        n_channels=1, patch_size=(64, 64),
-        predict=not disable_predict,
-        in_episodes=in_episode, out_episodes=out_episode)
+    model = chainervr.models.DeepEpisodicMemory(
+        hidden_channels=hidden_channels, num_episodes=num_episodes)
 
     model.reset_state()
     if gpu >= 0:
@@ -72,6 +69,7 @@ def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episod
 
     os.makedirs(out, exist_ok=True)
 
+    chainer.config.train = False
     info("Forwarding")
 
     xp = model.xp

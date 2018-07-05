@@ -51,7 +51,7 @@ def train(batch_size, max_iter,
         n_channels=1, patch_size=(64, 64),
         in_episodes=in_episodes, out_episodes=out_episodes,
         predict=not disable_predict)
-    train_chain = chainervr.models.UnsupervisedLearningTrainChain(
+    train_chain = chainervr.models.EpisodicTrainChain(
         model, ratio=0.5)
 
     model.reset_state()

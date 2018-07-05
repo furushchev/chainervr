@@ -14,6 +14,7 @@ import multiprocessing as mp
 import chainer
 from chainer import serializers
 from chainer import training
+import chainer.functions as F
 from chainer.training import extensions
 try:
     import chainermn
@@ -28,31 +29,48 @@ def info(msg):
     click.secho(msg, fg="green")
 
 
+def mse_gd_loss(x, t, eta=0.5):
+    mse = F.mean_squared_error(x, t)
+    gd = chainervr.functions.gradient_difference(x, t)
+    return mse * (1.0 - eta) + gd * eta
+
+
 @click.command()
 @click.option("--batch-size", type=int, default=16)
 @click.option("--max-iter", type=int, default=100000)
 @click.option("--gpu", type=int, default=-1)
 @click.option("--multi-gpu", is_flag=True)
-@click.option("--disable-predict", is_flag=True)
-@click.option("--out", type=str, default="lstm_results")
-@click.option("--layer-num", type=int, default=2)
-@click.option("--in-episodes", type=int, default=5)
-@click.option("--out-episodes", type=int, default=5)
+@click.option("--out", type=str, default="deep_episodic_memory_results")
+@click.option("--loss-func", type=click.Choice(["mse", "gd", "mse_gd"]), default="mse_gd")
+@click.option("--eta", type=float, default=0.4)
+@click.option("--hidden-channels", type=int, default=1000)
+@click.option("--dropout", type=float, default=0.1)
+@click.option("--noise-sigma", type=float, default=0.1)
+@click.option("--num-episodes", type=int, default=5)
 @click.option("--log-interval", type=int, default=10)
 @click.option("--snapshot-interval", type=int, default=1000)
 @click.option("--resume", type=str, default="")
 def train(batch_size, max_iter,
           gpu, multi_gpu, out,
-          disable_predict,
-          layer_num, in_episodes, out_episodes,
+          loss_func, eta,
+          hidden_channels, num_episodes,
+          dropout, noise_sigma,
           log_interval, snapshot_interval, resume):
     info("Loading model")
 
-    model = chainervr.models.UnsupervisedLearningLSTM(
-        n_channels=1, n_size=(64, 64),
-        n_layers=layer_num, predict=not disable_predict)
+    model = chainervr.models.DeepEpisodicMemory(
+        hidden_channels=hidden_channels, num_episodes=num_episodes,
+        dropout=dropout, noise_sigma=noise_sigma)
+
+    if loss_func == "mse":
+        loss_func = F.mean_squared_error
+    elif loss_func == "gd":
+        loss_func = chainervr.functions.gradient_difference
+    else:
+        loss_func = lambda x, t: mse_gd_loss(x,t, eta)
+
     train_chain = chainervr.models.EpisodicTrainChain(
-        model, ratio=0.5)
+        model, ratio=0.5, loss_func=loss_func)
 
     model.reset_state()
 
@@ -75,12 +93,12 @@ def train(batch_size, max_iter,
     if not multi_gpu or comm.rank == 0:
         train_data = chainer.datasets.TransformDataset(
             chainervr.datasets.MovingMnistDataset(
-                split="train", channels_num=1),
-            chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
+                split="train", channels_num=3),
+            chainervr.datasets.SplitEpisode([num_episodes, num_episodes]))
         test_data = chainer.datasets.TransformDataset(
             chainervr.datasets.MovingMnistDataset(
-                split="test", channels_num=1),
-            chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
+                split="test", channels_num=3),
+            chainervr.datasets.SplitEpisode([num_episodes, num_episodes]))
     else:
         train_data = test_data = None
     nprocs = None

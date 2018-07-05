@@ -12,8 +12,12 @@ from ... import links
 class DeepEpisodicMemoryEncoder(chainer.Chain):
     """Deep Episodic Memory Encoder"""
 
-    def __init__(self, fc_channels=1000, fc_lstm_channels=1000,
-                 dropout_ratio=0.1):
+    def __init__(self, out_channels=None, dropout=None):
+        if out_channels is None:
+            out_channels = 1000
+        if dropout is None:
+            dropout = 0.1
+
         super(DeepEpisodicMemoryEncoder, self).__init__(
             conv1=L.Convolution2D(3, 32, 5, stride=2, pad=2),
             conv_norm1=links.LayerNormalization(),
@@ -40,11 +44,12 @@ class DeepEpisodicMemoryEncoder(chainer.Chain):
             lstm5=links.ConvolutionLSTM2D(64, 64, 3),
             lstm_norm5=links.LayerNormalization(),
             #
-            fc_conv=L.Convolution2D(64, fc_channels, 4, stride=1, pad=0),
-            fc_lstm=links.ConvolutionLSTM2D(fc_channels, fc_lstm_channels, 1),
+            fc_conv=L.Convolution2D(64, out_channels, 4, stride=1, pad=0),
+            fc_lstm=links.ConvolutionLSTM2D(out_channels, out_channels, 1),
         )
-        self.dropout_ratio = dropout_ratio
-        self.reset_state()
+
+        self.out_channels = out_channels
+        self.dropout = dropout
 
     def reset_state(self):
         for link in self.links():
@@ -55,34 +60,34 @@ class DeepEpisodicMemoryEncoder(chainer.Chain):
         h = self.conv1(x)
         h = F.relu(self.conv_norm1(h))
         #
-        h = self.lstm1(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.lstm1(F.dropout(h, ratio=self.dropout))
         h = self.lstm_norm1(h)
         #
-        h = self.conv2(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.conv2(F.dropout(h, ratio=self.dropout))
         h = F.relu(self.conv_norm2(h))
         #
-        h = self.lstm2(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.lstm2(F.dropout(h, ratio=self.dropout))
         h = self.lstm_norm2(h)
         #
-        h = self.conv3(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.conv3(F.dropout(h, ratio=self.dropout))
         h = F.relu(self.conv_norm3(h))
         #
-        h = self.lstm3(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.lstm3(F.dropout(h, ratio=self.dropout))
         h = self.lstm_norm3(h)
         #
-        h = self.conv4(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.conv4(F.dropout(h, ratio=self.dropout))
         h = F.relu(self.conv_norm4(h))
         #
-        h = self.lstm4(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.lstm4(F.dropout(h, ratio=self.dropout))
         h = self.lstm_norm4(h)
         #
-        h = self.conv5(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.conv5(F.dropout(h, ratio=self.dropout))
         h = F.relu(self.conv_norm5(h))
         #
-        h = self.lstm5(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.lstm5(F.dropout(h, ratio=self.dropout))
         h = self.lstm_norm5(h)
         #
-        h = self.fc_conv(F.dropout(h, ratio=self.dropout_ratio))
-        h = self.fc_lstm(F.dropout(h, ratio=self.dropout_ratio))
+        h = self.fc_conv(F.dropout(h, ratio=self.dropout))
+        h = self.fc_lstm(F.dropout(h, ratio=self.dropout))
         #
         return F.concat((self.fc_lstm.c, self.fc_lstm.h))  # 2 * fc_lstm_channels

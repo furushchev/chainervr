@@ -5,3 +5,4 @@
 from .conv_lstm import *
 from .deep_episodic_memory import *
 from .unsupervised_videos import *
+from .episodic_train_chain import EpisodicTrainChain

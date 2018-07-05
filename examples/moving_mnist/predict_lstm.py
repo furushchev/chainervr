@@ -114,7 +114,7 @@ def predict(model_path, gpu, out, split, layer_num, in_episode, out_episode):
         ax.set_axis_off()
 
         out_path = os.path.join(out, "result_%03d.png" % n)
-        plt.savefig(out_path, bbox_inches="tight")
+        plt.savefig(out_path, bbox_inches="tight", dpi=160)
         info("saved to %s" % out_path)
         plt.close(fig)
 
