@@ -42,18 +42,18 @@ def extract(in_data, gpu):
 @click.command()
 @click.argument("model_path")
 @click.option("--gpu", "-g", type=int, default=-1)
-@click.option("--out", "-o", type=str, default="lstm_predict")
+@click.option("--out", "-o", type=str, default="conv_lstm_predict")
 @click.option("--split", type=str, default="test")
-@click.option("--layer-num", type=int, default=2)
+@click.option("--disable-predict", is_flag=True)
 @click.option("--in-episode", type=int, default=5)
 @click.option("--out-episode", type=int, default=5)
-def predict(model_path, gpu, out, split, layer_num, in_episode, out_episode):
+def predict(model_path, gpu, out, split, disable_predict, in_episode, out_episode):
 
     info("Loading model from %s" % model_path)
 
-    model = chainervr.models.UnsupervisedLearningLSTM(
+    model = chainervr.models.ConvLSTM(
         n_channels=1, patch_size=(64, 64),
-        n_layers=layer_num,
+        predict=not disable_predict,
         in_episodes=in_episode, out_episodes=out_episode)
 
     model.reset_state()
@@ -91,7 +91,7 @@ def predict(model_path, gpu, out, split, layer_num, in_episode, out_episode):
         reconst = extract(reconst, gpu)
         pred = extract(pred, gpu)
 
-        fig = plt.figure()
+        fig = plt.figure(dpi=160)
 
         ax = fig.add_subplot(2, 2, 1)
         ax = vis_episode(in_data, ax=ax)

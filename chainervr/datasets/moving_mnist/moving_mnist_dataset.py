@@ -50,15 +50,15 @@ if __name__ == '__main__':
     if not os.getenv("DISPLAY", None):
         import matplotlib
         matplotlib.use('Agg')
-    from chainercv.visualizations import vis_image
+    from chainervr.visualizations import vis_episode
     import matplotlib.pyplot as plt
 
     dataset = MovingMnistDataset()
     for i, frames in enumerate(dataset):
-        for j, frame in enumerate(frames):
-            print(frame.shape)
-            vis_image(frame)
-            fname = "image_%05d_%02d.jpg" % (i, j)
-            plt.savefig(fname)
-            print("Saved to %s" % fname)
-            plt.show()
+        vis_episode(frames)
+        plt.title("Dataset %d/%d" % (i, len(dataset)))
+        fname = "image_%05d.jpg" % i
+        plt.savefig(fname, dpi=300, bbox_inches="tight")
+        print("Saved to %s" % fname)
+        plt.close(plt.figure())
+

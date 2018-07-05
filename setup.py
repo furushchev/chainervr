@@ -7,14 +7,14 @@ from setuptools import setup
 
 
 setup(
-    name='chainer-deep-episodic-memory',
+    name='chainer-video-representations',
     version="0.1.0",
     packages=find_packages(),
     include_package_data=True,
     install_requires=open('requirements.txt').readlines(),
     author="Yuki Furuta",
     author_email="furushchev@jsk.imi.i.u-tokyo.ac.jp",
-    description="Chainer implementation of Deep Episodic Memory",
-    url="https://github.com/furushchev/chainer-deep-episodic-memory",
+    description="Chainer implementation of Networks for Learning Visual Representation",
+    url="https://github.com/furushchev/chainervr",
     license="MIT",
 )

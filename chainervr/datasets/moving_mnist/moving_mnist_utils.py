@@ -8,7 +8,7 @@ import shutil
 from chainer.dataset import download
 
 
-root = "pfnet/chainer_deep_episodic_memory/moving_mnist"
+root = "pfnet/chainervr/moving_mnist"
 url = "http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy"
 
 

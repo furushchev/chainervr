@@ -21,7 +21,7 @@ try:
 except:
     multi_gpu_available = False
 
-import chainer_deep_episodic_memory as D
+import chainervr
 
 
 def info(msg):
@@ -44,10 +44,10 @@ def train(batch_size, max_iter, loss_func,
           log_interval, snapshot_interval, resume):
 
     info("Preparing model")
-    model = D.models.DeepEpisodicMemory(
+    model = chainervr.models.DeepEpisodicMemory(
         hidden_channels=1000, out_channels=3,
         episode_size=episode_size)
-    train_chain = D.models.DeepEpisodicMemoryTrainChain(
+    train_chain = chainervr.models.DeepEpisodicMemoryTrainChain(
         model, loss_func=loss_func)
 
     train_chain.reset_state()
@@ -69,7 +69,7 @@ def train(batch_size, max_iter, loss_func,
     info("Loading dataset")
     if multi_gpu:
         if multi_gpu_comm.rank == 0:
-            train_data = D.datasets.MovingMnistDataset()
+            train_data = chainervr.datasets.MovingMnistDataset()
         else:
             train_data = None
         train_data = chainermn.scatter_dataset(
@@ -81,7 +81,7 @@ def train(batch_size, max_iter, loss_func,
                 train_data, batch_size,
                 n_processes=mp.cpu_count() // multi_gpu_comm.size)
     else:
-        train_data = D.datasets.MovingMnistDataset()
+        train_data = chainervr.datasets.MovingMnistDataset()
         train_iter = chainer.iterators.MultiprocessIterator(
             train_data, batch_size)
 
@@ -92,7 +92,7 @@ def train(batch_size, max_iter, loss_func,
             optimizer, multi_gpu_comm)
     optimizer.setup(train_chain)
 
-    updater = D.training.EpisodicUpdater(train_iter, optimizer, device=gpu)
+    updater = chainervr.training.EpisodicUpdater(train_iter, optimizer, device=gpu)
     trainer = training.Trainer(updater, (max_iter, "iteration"), out=out)
 
     if not multi_gpu or multi_gpu_comm.rank == 0:

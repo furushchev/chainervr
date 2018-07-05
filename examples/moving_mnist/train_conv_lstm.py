@@ -34,8 +34,7 @@ def info(msg):
 @click.option("--gpu", type=int, default=-1)
 @click.option("--multi-gpu", is_flag=True)
 @click.option("--disable-predict", is_flag=True)
-@click.option("--out", type=str, default="lstm_results")
-@click.option("--layer-num", type=int, default=2)
+@click.option("--out", type=str, default="conv_lstm_results")
 @click.option("--in-episodes", type=int, default=5)
 @click.option("--out-episodes", type=int, default=5)
 @click.option("--log-interval", type=int, default=10)
@@ -44,13 +43,14 @@ def info(msg):
 def train(batch_size, max_iter,
           gpu, multi_gpu, out,
           disable_predict,
-          layer_num, in_episodes, out_episodes,
+          in_episodes, out_episodes,
           log_interval, snapshot_interval, resume):
     info("Loading model")
 
-    model = chainervr.models.UnsupervisedLearningLSTM(
-        n_channels=1, n_size=(64, 64),
-        n_layers=layer_num, predict=not disable_predict)
+    model = chainervr.models.ConvLSTM(
+        n_channels=1, patch_size=(64, 64),
+        in_episodes=in_episodes, out_episodes=out_episodes,
+        predict=not disable_predict)
     train_chain = chainervr.models.UnsupervisedLearningTrainChain(
         model, ratio=0.5)
 
