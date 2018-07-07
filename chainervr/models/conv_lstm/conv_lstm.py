@@ -87,7 +87,7 @@ class ConvLSTM(chainer.Chain):
         if self.in_episodes is None:
             self.in_episodes = self.out_episodes = nframes
         else:
-            assert self.in_episodes == nframes
+            assert self.in_episodes == nframes, "%s != %s" % (self.in_episodes, nframes)
 
         self.reset_state()
 

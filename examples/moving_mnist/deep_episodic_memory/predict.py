@@ -13,11 +13,14 @@ sys.path.insert(0, osp.join(_THIS_DIR, ".."))
 import predict_common as P
 
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
 @click.argument("model_path")
-@click.option("--gpu", type=int, default=-1)
-@click.option("--out", type=str, default="predicts")
-@click.option("--split", type=str, default="test")
+@P.predict_params
 @click.option("--hidden-channels", type=int, default=1000)
 @click.option("--num-episodes", type=int, default=5)
 @click.option("--start-from", type=int, default=0)
@@ -44,6 +47,31 @@ def predict(model_path, gpu, out, split, hidden_channels,
         images_num=images_num)
 
 
+@cli.command()
+@click.argument("model_dir")
+@P.predict_params
+@click.option("--hidden-channels", type=int, default=1000)
+@click.option("--num-episodes", type=int, default=5)
+@click.option("--image-num", type=int, default=0)
+def summary(model_path, gpu, out, split, hidden_channels,
+            num_episodes, image_num):
+
+    model = chainervr.models.DeepEpisodicMemory(
+        hidden_channels=hidden_channels, num_episodes=num_episodes)
+
+    model.reset_state()
+
+    P.predict_summary(
+        model=model,
+        model_dir=model_dir,
+        gpu=gpu,
+        in_episodes=in_episodes,
+        out_episodes=out_episodes,
+        channels_num=3,
+        out=out,
+        split=split,
+        image_num=image_num)
+
 
 if __name__ == '__main__':
-    predict()
+    cli()
