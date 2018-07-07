@@ -13,14 +13,40 @@ sys.path.insert(0, osp.join(_THIS_DIR, ".."))
 import predict_common as P
 
 
-@click.command()
-@click.argument("model_path")
-@click.option("--gpu", type=int, default=-1)
-@click.option("--out", type=str, default="predicts")
-@click.option("--split", type=str, default="test")
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@P.predict_params
 @click.option("--disable-predict", is_flag=True)
-@click.option("--in-episodes", type=int, default=5)
-@click.option("--out-episodes", type=int, default=5)
+@click.argument("model_dir")
+@click.option("--image-num", type=int, default=0)
+def summary(model_dir, gpu, in_episodes, out_episodes,
+            disable_predict, out, split, image_num):
+    model = chainervr.models.ConvLSTM(
+        n_channels=1, patch_size=(64, 64),
+        predict=not disable_predict,
+        in_episodes=in_episodes, out_episodes=out_episodes)
+
+    model.reset_state()
+
+    P.predict_summary(
+        model=model,
+        model_dir=model_dir,
+        gpu=gpu,
+        in_episodes=in_episodes,
+        out_episodes=out_episodes,
+        channels_num=1,
+        out=out,
+        split=split,
+        image_num=image_num)
+
+@cli.command()
+@click.argument("model_path")
+@P.predict_params
+@click.option("--disable-predict", is_flag=True)
 @click.option("--start-from", type=int, default=0)
 @click.option("--images-num", type=int, default=100)
 def predict(model_path, gpu, out, split, disable_predict,
@@ -49,4 +75,4 @@ def predict(model_path, gpu, out, split, disable_predict,
 
 
 if __name__ == '__main__':
-    predict()
+    cli()
