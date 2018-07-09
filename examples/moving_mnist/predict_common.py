@@ -87,11 +87,8 @@ def predict(model, model_path, gpu,
         if gpu >= 0:
             with chainer.cuda.get_device_from_id(gpu):
                 in_data.to_gpu()
-        try:
-            out_data = model(in_data)
-        except Exception as e:
-            print(e)
-            continue
+
+        out_data = model(in_data)
         reconst, pred = out_data[0], out_data[1]
 
         in_data = extract(in_data, gpu)
@@ -197,6 +194,7 @@ def predict_summary(model, model_dir, gpu,
         i += 1
         info("Generated image using %s" % model_path)
 
+    os.makedirs(out, exist_ok=True)
     out_path = os.path.join(out, "summary.png")
     plt.savefig(out_path, bbox_inches="tight", dpi=300)
     info("saved to %s" % out_path)
