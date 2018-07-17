@@ -12,6 +12,7 @@ from ... import links
 
 
 class ConvLSTM(chainer.Chain):
+    """Reconstruction-Prediction Network using Convolutional LSTM"""
     def __init__(self, n_channels, hidden_channels=None,
                  in_episodes=None, out_episodes=None,
                  patch_size=(128, 128),
