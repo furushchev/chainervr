@@ -32,12 +32,31 @@ class LayerNormalization(chainer.Link):
         self.beta.initialize(size)
 
     def __call__(self, x):
+        assert x.ndim == 4  # BCHW
         if self.gamma.data is None:
             in_size = x[0].shape
             self._initialize_params(in_size)
-        mean = F.broadcast_to(F.mean(x, keepdims=True), x.shape)
-        var = F.broadcast_to(F.mean((x - mean) ** 2, keepdims=True), x.shape)
+        mean = F.broadcast_to(F.mean(x, keepdims=True, axis=(1, 2, 3)), x.shape)
+        var = F.broadcast_to(F.mean((x - mean) ** 2, keepdims=True, axis=(1, 2, 3)), x.shape)
         mean = mean[0]
         var = var[0]
+
         return F.fixed_batch_normalization(
             x, self.gamma, self.beta, mean, var, self.eps)
+
+
+if __name__ == '__main__':
+    import numpy as np
+    img = np.arange(10*10*3, dtype=np.float32).reshape((10, 10, 3))
+
+    print(img)
+    img = img.transpose((2, 0, 1))
+    in_data = img[np.newaxis, :]
+
+    ln = LayerNormalization()
+
+    out_data = ln(in_data)
+    out = out_data[0]
+    out = out.transpose((1, 2, 0))
+
+    print(out)
