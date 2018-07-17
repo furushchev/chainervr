@@ -9,6 +9,7 @@ import chainer.links as L
 
 
 class RPLSTM(chainer.Chain):
+    """Reconstruction-Prediction LSTM"""
     def __init__(self, n_channels, patch_size, n_layers=None, n_hidden=None, predict=True,
                  in_episodes=None, out_episodes=None):
         super(RPLSTM, self).__init__()
