@@ -76,7 +76,9 @@ class DeepEpisodicMemoryDecoder(chainer.Chain):
         outputs = []
         for i in range(self.num_episodes):
             l0 = self.fc_lstm(l0)
+            #
             d0 = self.fc_deconv(F.dropout(l0, ratio=self.dropout))
+            d0 = F.relu(d0)
             #
             l1 = self.lstm1(F.dropout(d0, ratio=self.dropout))
             l1 = self.lstm_norm1(l1)
@@ -106,6 +108,7 @@ class DeepEpisodicMemoryDecoder(chainer.Chain):
             l5 = self.lstm_norm5(l5)
             #
             o = self.deconv5(F.dropout(l5, ratio=self.dropout))
+            o = F.relu(o)
             #
             o = o[:, None, :, :, :]
             outputs.append(o)  # <- B1CHW
