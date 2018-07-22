@@ -14,10 +14,12 @@ class ConvolutionLSTM2D(chainer.Chain):
     """https://arxiv.org/pdf/1607.06450.pdf"""
     def __init__(self, in_channels, out_channels, ksize=None, stride=1, pad=None,
                  hidden_init=None, upward_init=None, bias_init=None, forget_bias_init=None):
-        if out_channels is None:
-            in_channels, out_channels = None, in_channels
+        if ksize is None:
+            in_channels, out_channels, ksize = None, in_channels, out_channels
+        if stride is None:
+            stride = 1
         if pad is None:
-            pad = ksize // 2
+            pad = (ksize - stride) // 2
         super(ConvolutionLSTM2D, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
