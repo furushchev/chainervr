@@ -16,7 +16,7 @@ import train_common as T
 
 def mse_gd_loss(x, t, eta=0.5):
     mse = F.mean_squared_error(x, t)
-    gd = chainervr.functions.gradient_difference(x, t)
+    gd = chainervr.functions.gradient_difference_error(x, t)
     return mse * (1.0 - eta) + gd * eta
 
 
