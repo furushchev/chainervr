@@ -87,7 +87,7 @@ class DeepEpisodicMemory(chainer.Chain):
             ln_var = xp.ones_like(hidden, dtype=hidden.dtype) * noise_sigma
             hidden = F.gaussian(hidden, ln_var)
 
-        reconst = self.decoder_pred(hidden)
+        reconst = self.decoder_reconst(hidden)
         pred = self.decoder_pred(hidden)
 
         reconst = resize_seq_images(reconst, in_size)

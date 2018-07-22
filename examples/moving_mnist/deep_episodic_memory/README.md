@@ -4,6 +4,8 @@
 
 ``` bash
 python ./train.py --gpu 0
+# or
+mpirun -np 3 python train.py --multi-gpu
 ```
 
 After running this script, trained data and log files are generated at `results` directory.
