@@ -14,7 +14,7 @@ import train_common as T
 
 
 @click.command()
-@click.option("--batch-size", type=int, default=16)
+@click.option("--batch-size", type=int, default=4)
 @click.option("--max-iter", type=int, default=100000)
 @click.option("--gpu", type=int, default=-1)
 @click.option("--multi-gpu", is_flag=True)
@@ -22,8 +22,8 @@ import train_common as T
 @click.option("--out", type=str, default="results")
 @click.option("--in-episodes", type=int, default=5)
 @click.option("--out-episodes", type=int, default=5)
-@click.option("--log-interval", type=int, default=10)
-@click.option("--snapshot-interval", type=int, default=1000)
+@click.option("--log-interval", type=int, default=100)
+@click.option("--snapshot-interval", type=int, default=100)
 @click.option("--resume", type=str, default="")
 def train(batch_size, max_iter,
           gpu, multi_gpu, out,
