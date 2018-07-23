@@ -14,7 +14,7 @@ import train_common as T
 
 
 @click.command()
-@click.option("--batch-size", type=int, default=4)
+@click.option("--batch-size", type=int, default=8)
 @click.option("--max-iter", type=int, default=100000)
 @click.option("--gpu", type=int, default=-1)
 @click.option("--multi-gpu", is_flag=True)
