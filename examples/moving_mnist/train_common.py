@@ -35,7 +35,7 @@ def train(model, train_chain, channels_num, in_episodes, out_episodes,
         if not multi_gpu_available:
             raise click.BadParameter("chainermn is not yet installed")
         info("Using multiple GPU")
-        comm = chainermn.create_communicator()
+        comm = chainermn.create_communicator(communicator_name="pure_nccl")
         gpu = comm.intra_rank
 
     if gpu >= 0:
