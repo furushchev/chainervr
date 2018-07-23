@@ -41,6 +41,10 @@ arXiv preprint arXiv:1801.04134 (2018).
 
 - [Reconstruction and Prediction of Moving Mnist Dataset](examples/moving_mnist)
 
+## Awesome References
+
+- [Lecture CS231n at Stanford Univ.](http://cs231n.github.io/convolutional-networks/)
+- [Padding of ConvNet in Tensorflow](https://www.tensorflow.org/api_guides/python/nn#convolution)
 
 ## Author
 
