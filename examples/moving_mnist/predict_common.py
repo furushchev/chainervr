@@ -25,24 +25,6 @@ def info(msg):
     click.secho(msg, fg="green")
 
 
-def extract(data, gpu):
-    if isinstance(data, chainer.Variable):
-        if gpu >= 0:
-            data = F.copy(data, -1)
-        data = data.array
-    data = data[0]  # NCHW
-    channels = data.shape[1]
-    if channels == 1:
-        out_shape = list(data.shape)
-        out_shape[1] = 3
-        data = np.broadcast_to(data, out_shape)
-    # lower bound = 0
-    data.flags.writeable = True
-    data[data <= 0.0] = 0.0
-    data[data >= 1.0] = 1.0
-    return data
-
-
 def predict_params(func):
     @click.option("--gpu", type=int, default=-1)
     @click.option("--out", type=str, default="predicts")
@@ -91,32 +73,19 @@ def predict(model, model_path, gpu,
         out_data = model(in_data)
         reconst, pred = out_data[0], out_data[1]
 
-        in_data = extract(in_data, gpu)
-        next_data = extract(next_data, gpu)
-        reconst = extract(reconst, gpu)
-        pred = extract(pred, gpu)
-
         fig = plt.figure()
 
         ax = fig.add_subplot(2, 2, 1)
-        ax = vis_episode(in_data, ax=ax)
-        ax.set_title("Input")
-        ax.set_axis_off()
+        ax = vis_episode(in_data, ax=ax, title="Input")
 
         ax = fig.add_subplot(2, 2, 2)
-        ax = vis_episode(next_data, ax=ax)
-        ax.set_title("Predict Ground Truth")
-        ax.set_axis_off()
+        ax = vis_episode(next_data, ax=ax, title="Predicted Ground Truth")
 
         ax = fig.add_subplot(2, 2, 3)
-        ax = vis_episode(reconst, ax=ax)
-        ax.set_title("Reconstruction")
-        ax.set_axis_off()
+        ax = vis_episode(reconst, ax=ax, title="Reconstruction")
 
         ax = fig.add_subplot(2, 2, 4)
-        ax = vis_episode(pred, ax=ax)
-        ax.set_title("Prediction")
-        ax.set_axis_off()
+        ax = vis_episode(pred, ax=ax, title="Prediction")
 
         out_path = os.path.join(out, "result_%03d.png" % n)
         plt.savefig(out_path, bbox_inches="tight", dpi=160)
@@ -154,20 +123,15 @@ def predict_summary(model, model_dir, gpu,
 
 
     rows = len(model_paths) + 1
-    fontsize = 6
     fig = plt.figure(figsize=(3, rows))
     i = 1
 
     ax = fig.add_subplot(rows, 2, i)
-    ax = vis_episode(extract(in_data, gpu), ax=ax)
-    ax.set_title("Input", fontsize=fontsize)
-    ax.set_axis_off()
+    ax = vis_episode(in_data, ax=ax, title="Input")
     i += 1
 
     ax = fig.add_subplot(rows, 2, i)
-    ax = vis_episode(extract(next_data, gpu), ax=ax)
-    ax.set_title("Predict Ground Truth", fontsize=fontsize)
-    ax.set_axis_off()
+    ax = vis_episode(in_data, ax=ax, title="Predicted Ground Truth")
     i += 1
 
     for model_path in model_paths:
@@ -178,19 +142,12 @@ def predict_summary(model, model_dir, gpu,
         out_data = model(in_data)
         reconst, pred = out_data[0], out_data[1]
 
-        reconst = extract(reconst, gpu)
-        pred = extract(pred, gpu)
-
         ax = fig.add_subplot(rows, 2, i)
-        ax = vis_episode(reconst, ax=ax)
-        ax.set_title("%s Reconst" % model_name, fontsize=fontsize)
-        ax.set_axis_off()
+        ax = vis_episode(reconst, ax=ax, title="%s Reconst" % model_name)
         i += 1
 
         ax = fig.add_subplot(rows, 2, i)
-        ax = vis_episode(pred, ax=ax)
-        ax.set_title("%s Pred" % model_name, fontsize=fontsize)
-        ax.set_axis_off()
+        ax = vis_episode(pred, ax=ax, title="%s Pred" % model_name)
         i += 1
         info("Generated image using %s" % model_path)
 

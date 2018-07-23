@@ -6,6 +6,7 @@ import click
 import os.path as osp
 import sys
 import chainervr
+from chainervr.visualizations import vis_episode
 
 _THIS_DIR = osp.dirname(osp.abspath(__file__))
 sys.path.insert(0, osp.join(_THIS_DIR, ".."))
@@ -209,27 +210,19 @@ def detect(model_path, features_path, input_num, top_n,
     ranking = (-similarities).argsort()
 
     rows = top_n + 1
-    fontsize = 6
     fig = plt.figure(figsize=(3, rows))
-    i = 1
 
-    ax = fig.add_subplot(rows, 1, i)
-    ax = P.vis_episode(P.extract(in_data, gpu), ax=ax)
-    ax.set_title("Input", fontsize=fontsize)
-    ax.set_axis_off()
-    i += 1
+    ax = fig.add_subplot(rows, 1, 1)
+    ax = vis_episode(in_data, ax=ax, title="Input")
 
     for n in range(top_n):
         index = ranking[n]
         similarity = similarities[index]
         comp_data = dataset[index][:in_episodes][np.newaxis, :]
 
-        ax = fig.add_subplot(rows, 1, i)
-        ax = P.vis_episode(P.extract(comp_data, gpu), ax=ax)
-        ax.set_title("Top %d (index: %d, similarity: %f)" % (n+1, index, similarity),
-                     fontsize=fontsize)
-        ax.set_axis_off()
-        i += 1
+        ax = fig.add_subplot(rows, 1, n+2)
+        ax = vis_episode(comp_data, ax=ax,
+                         title="Top %d (index: %d, similarity: %f)" % (n+1, index, similarity))
 
     os.makedirs(out, exist_ok=True)
     out_path = os.path.join(out, "rank.png")

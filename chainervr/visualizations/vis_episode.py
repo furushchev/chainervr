@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 # Author: Yuki Furuta <furushchev@jsk.imi.i.u-tokyo.ac.jp>
 
+from .util import extract_images
 
-def vis_episode(in_data, ax=None, vertical=False, anti_aliasing=False):
+
+def vis_episode(in_data, ax=None, vertical=False, anti_aliasing=False,
+                title=None, fontsize=None, draw_axis=False):
     """Visualize image sequence
 
     Args:
@@ -11,6 +14,9 @@ def vis_episode(in_data, ax=None, vertical=False, anti_aliasing=False):
         ax (matplotlib.axes.Axis): Axis on which images are drawn. A new axis is created if this value is `None`.
         vertical (bool): Images are drawn vertically if this value is `True`, otherwise drawn horizontally.
         anti_aliasing (bool): Resize with anti-aliasing if this value is `True`.
+        title (str): Draw title on images.
+        fontsize (int): Font size of title.
+        draw_axis (bool): Draw axis for image if true.
     Returns:
         Returns the axis where images are drawn.
     """
@@ -22,6 +28,8 @@ def vis_episode(in_data, ax=None, vertical=False, anti_aliasing=False):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
+
+    in_data = extract_images(in_data)
 
     nframes = None
     if isinstance(in_data, list):
@@ -53,5 +61,12 @@ def vis_episode(in_data, ax=None, vertical=False, anti_aliasing=False):
         in_data = np.broadcast_to(in_data, in_data.shape[:-1] + (3,))
 
     ax.imshow(in_data)
+
+    if fontsize is None:
+        fontsize = 6
+    if title is not None:
+        ax.set_title(title, fontsize=fontsize)
+    if draw_axis is False:
+        ax.set_axis_off()
 
     return ax
