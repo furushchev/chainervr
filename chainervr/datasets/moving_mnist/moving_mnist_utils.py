@@ -4,22 +4,17 @@
 
 import os
 import numpy as np
-import shutil
-from chainer.dataset import download
+from .. import utils
 
 
-root = "pfnet/chainervr/moving_mnist"
 url = "http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy"
 
 
 def get_moving_mnist():
-    data_dir = download.get_dataset_directory(root)
-    path = os.path.join(data_dir, os.path.basename(url))
-    def cached_download(dst):
-        src = download.cached_download(url)
-        shutil.copy(src, dst)
-        return np.load(dst)
-    return download.cache_or_load_file(
-        path,
-        lambda path: cached_download(path),
-        np.load)
+    return utils.cache_or_load_file(
+        "moving_mnist", url, os.path.basename(url), np.load)
+
+
+if __name__ == '__main__':
+    data = get_moving_mnist()
+    print(data.shape)

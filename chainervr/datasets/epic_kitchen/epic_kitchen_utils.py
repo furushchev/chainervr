@@ -8,7 +8,7 @@ import json
 import os.path as osp
 from chainer.dataset import download
 import multiprocessing as mp
-from chainercv import utils
+from .. import utils
 
 
 root = "pfnet/chainercv/epic_kitchen"
@@ -26,20 +26,18 @@ def get_frames(split):
 
 
 def _get_image(url, destination, force_download, extract=True):
-    ext = osp.splitext(url)[1]
-
     if not force_download:
         if osp.exists(destination):
             return str(destination)
         else:
             archive = destination + ".tar"
             if osp.exists(archive):
-                utils.extractall(archive, destination, ext)
+                utils.extract_archive(archive, destination)
                 return str(destination)
 
     if extract:
         cache_path = utils.cached_download(url)
-        utils.extractall(cache_path, destination, ext)
+        utils.extract_archive(cache_path, destination)
     else:
         from six.moves.urllib import request
         import tempfile
@@ -110,8 +108,8 @@ def get_object_detection_images(split, download_parallel_num=None, download_time
     if not osp.exists(osp.join(annos_root, anno_fn)):
         download_file_path = utils.cached_download(anno_url)
         ext = osp.splitext(anno_url)[1]
-        utils.extractall(download_file_path,
-                         data_dir, ext)
+        utils.extract_archive(download_file_path,
+                              data_dir, ext)
     anno_path = osp.join(annos_root, anno_fn)
     annotations = parse_object_detection_annotation(anno_path)
     image_archive_fns = set()
@@ -244,7 +242,7 @@ def get_action_videos(split="train", download_parallel_num=None, download_timeou
         if not osp.exists(osp.join(annos_root, anno_fn)):
             download_file_path = utils.cached_download(anno_url)
             ext = osp.splitext(anno_url)[1]
-            utils.extractall(download_file_path, data_dir, ext)
+            utils.extract_archive(download_file_path, data_dir, ext)
         annotations = parse_action_annotation(anno_path)
 
     # download videos
