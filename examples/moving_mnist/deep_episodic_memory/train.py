@@ -7,11 +7,7 @@ import os.path as osp
 import sys
 import chainer.functions as F
 import chainervr
-
-_THIS_DIR = osp.dirname(osp.abspath(__file__))
-sys.path.insert(0, osp.join(_THIS_DIR, ".."))
-
-import train_common as T
+import chainervr.utils.train as T
 
 
 def mse_gd_loss(x, t, eta=0.5):
@@ -61,10 +57,18 @@ def train(batch_size, max_iter,
 
     model.reset_state()
 
+    T.info("Loading dataset")
+
+    train_dataset = chainervr.datasets.MovingMnistDataset(
+        split="train", channels_num=3)
+    test_dataset = chainervr.datasets.MovingMnistDataset(
+        split="test", channels_num=3)
+
     T.train(
         model=model,
         train_chain=train_chain,
-        channels_num=3,
+        train_dataset=train_dataset,
+        test_dataset=test_dataset,
         in_episodes=num_episodes,
         out_episodes=num_episodes,
         gpu=gpu, multi_gpu=multi_gpu, out=out,

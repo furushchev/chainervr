@@ -8,7 +8,9 @@ from . import ucf101_utils as utils
 
 
 class UCF101Dataset(chainer.dataset.DatasetMixin):
-    def __init__(self, split="train", dataset_num=None, num_episodes=None):
+    def __init__(self, split="train",
+                 dataset_num=None, num_episodes=None,
+                 with_class=False):
         if num_episodes is None:
             num_episodes = 5
 
@@ -17,6 +19,7 @@ class UCF101Dataset(chainer.dataset.DatasetMixin):
         self.root_dir = dataset["root_dir"]
         self.annotations = dataset["annotations"]
         self.num_episodes = num_episodes
+        self.with_class = with_class
 
     def __len__(self):
         return self.annotations["filename"].shape[0]
@@ -26,7 +29,10 @@ class UCF101Dataset(chainer.dataset.DatasetMixin):
         cls = self.annotations["class"][i]
         data = utils.load_episode(videoname,
                                   num_episodes=self.num_episodes)
-        return data, cls
+        if self.with_class:
+            return data, cls
+        else:
+            return data
 
 
 if __name__ == '__main__':

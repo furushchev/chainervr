@@ -6,11 +6,7 @@ import click
 import os.path as osp
 import sys
 import chainervr
-
-_THIS_DIR = osp.dirname(osp.abspath(__file__))
-sys.path.insert(0, osp.join(_THIS_DIR, ".."))
-
-import train_common as T
+import chainervr.utils.train as T
 
 
 @click.command()
@@ -42,10 +38,18 @@ def train(batch_size, max_iter,
 
     model.reset_state()
 
+    T.info("Loading dataset")
+
+    train_dataset = chainervr.datasets.MovingMnistDataset(
+        split="train", channels_num=1)
+    test_dataset = chainervr.datasets.MovingMnistDataset(
+        split="test", channels_num=1)
+
     T.train(
         model=model,
         train_chain=train_chain,
-        channels_num=1,
+        train_dataset=train_dataset,
+        test_dataset=test_dataset,
         in_episodes=in_episodes,
         out_episodes=out_episodes,
         gpu=gpu, multi_gpu=multi_gpu, out=out,

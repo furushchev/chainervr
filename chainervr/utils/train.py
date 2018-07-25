@@ -25,7 +25,9 @@ def info(msg):
     click.secho(msg, fg="green")
 
 
-def train(model, train_chain, channels_num, in_episodes, out_episodes,
+def train(model, train_chain,
+          train_dataset, test_dataset,
+          in_episodes, out_episodes,
           gpu, multi_gpu, out,
           batch_size, max_iter, resume,
           log_interval, snapshot_interval):
@@ -48,12 +50,10 @@ def train(model, train_chain, channels_num, in_episodes, out_episodes,
     info("Loading dataset")
     if not multi_gpu or comm.rank == 0:
         train_data = chainer.datasets.TransformDataset(
-            chainervr.datasets.MovingMnistDataset(
-                split="train", channels_num=channels_num),
+            train_dataset,
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
         test_data = chainer.datasets.TransformDataset(
-            chainervr.datasets.MovingMnistDataset(
-                split="test", channels_num=channels_num),
+            test_dataset,
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
     else:
         train_data = test_data = None

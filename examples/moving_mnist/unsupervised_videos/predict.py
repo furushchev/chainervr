@@ -6,11 +6,7 @@ import click
 import os.path as osp
 import sys
 import chainervr
-
-_THIS_DIR = osp.dirname(osp.abspath(__file__))
-sys.path.insert(0, osp.join(_THIS_DIR, ".."))
-
-import predict_common as P
+import chainervr.utils.predict as P
 
 
 @click.group()
@@ -37,14 +33,18 @@ def predict(model_path, gpu, out, split, disable_predict, layers_num,
 
     model.reset_state()
 
+    P.info("Loading dataset")
+
+    dataset = chainervr.datasets.MovingMnistDataset(
+        split=split, channels_num=1)
+
     P.predict(
         model=model,
         model_path=model_path,
+        dataset=dataset,
         gpu=gpu, out=out,
         in_episodes=in_episodes,
         out_episodes=out_episodes,
-        channels_num=1,
-        split=split,
         start_from=start_from,
         images_num=images_num)
 
@@ -64,15 +64,19 @@ def summary(model_dir, gpu, out, split, disable_predict, layers_num,
 
     model.reset_state()
 
+    P.info("Loading dataset")
+
+    dataset = chainervr.datasets.MovingMnistDataset(
+        split=split, channels_num=1)
+
     P.predict_summary(
         model=model,
         model_dir=model_dir,
+        dataset=dataset,
         gpu=gpu,
         in_episodes=in_episodes,
         out_episodes=out_episodes,
-        channels_num=1,
         out=out,
-        split=split,
         image_num=image_num)
 
 

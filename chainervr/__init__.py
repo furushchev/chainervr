@@ -15,4 +15,5 @@ from . import functions
 from . import links
 from . import models
 from . import training
+from . import utils
 from . import visualizations

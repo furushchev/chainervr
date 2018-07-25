@@ -37,9 +37,9 @@ def predict_params(func):
     return wrapper
 
 
-def predict(model, model_path, gpu,
-            in_episodes, out_episodes, channels_num,
-            out, split, start_from, images_num):
+def predict(model, model_path, dataset, gpu,
+            in_episodes, out_episodes,
+            out, start_from, images_num):
     if gpu >= 0:
         info("Using GPU %d" % gpu)
         chainer.cuda.get_device_from_id(gpu).use()
@@ -48,10 +48,6 @@ def predict(model, model_path, gpu,
         info("Using CPU")
 
     chainer.serializers.load_npz(model_path, model)
-
-    info("Loading dataset")
-
-    dataset = chainervr.datasets.MovingMnistDataset(split=split, channels_num=channels_num)
 
     os.makedirs(out, exist_ok=True)
 
@@ -93,9 +89,9 @@ def predict(model, model_path, gpu,
         plt.close(fig)
 
 
-def predict_summary(model, model_dir, gpu,
-                    in_episodes, out_episodes, channels_num,
-                    out, split, image_num):
+def predict_summary(model, model_dir, dataset, gpu,
+                    in_episodes, out_episodes,
+                    out, image_num):
     if gpu >= 0:
         info("Using GPU %d" % gpu)
         chainer.cuda.get_device_from_id(gpu).use()
@@ -107,10 +103,6 @@ def predict_summary(model, model_dir, gpu,
     model_paths = glob.glob(glob_ex + "*")
     model_paths.sort(key=lambda s: int(s[len(glob_ex):]))
     info("Found %d models" % len(model_paths))
-
-    info("Loading dataset")
-
-    dataset = chainervr.datasets.MovingMnistDataset(split=split, channels_num=channels_num)
 
     data = dataset[image_num]
     in_data, next_data = data[:in_episodes], data[in_episodes:in_episodes+out_episodes]
