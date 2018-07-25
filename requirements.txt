@@ -5,3 +5,4 @@ matplotlib>=2.2.2
 pandas>=0.23.0
 scikit-image>=0.14.0
 six>=1.11.0
+rarfile>=3.0
