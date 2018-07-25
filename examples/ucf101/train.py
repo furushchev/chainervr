@@ -59,16 +59,12 @@ def train(batch_size, max_iter,
 
     T.info("Loading dataset")
 
-    train_dataset = chainervr.datasets.UCF101Dataset(
-        split="train", num_episodes=num_episodes*2)
-    test_dataset = chainervr.datasets.UCF101Dataset(
-        split="test", num_episodes=num_episodes*2)
-
     T.train(
         model=model,
         train_chain=train_chain,
-        train_dataset=train_dataset,
-        test_dataset=test_dataset,
+        train_dataset_cls=chainervr.datasets.UCF101Dataset,
+        test_dataset_cls=chainervr.datasets.UCF101Dataset,
+        dataset_args={"num_episodes": num_episodes*2},
         in_episodes=num_episodes,
         out_episodes=num_episodes,
         gpu=gpu, multi_gpu=multi_gpu, out=out,

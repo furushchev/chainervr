@@ -26,7 +26,8 @@ def info(msg):
 
 
 def train(model, train_chain,
-          train_dataset, test_dataset,
+          train_dataset_cls, test_dataset_cls,
+          dataset_args,
           in_episodes, out_episodes,
           gpu, multi_gpu, out,
           batch_size, max_iter, resume,
@@ -48,12 +49,14 @@ def train(model, train_chain,
         info("Training with CPU")
 
     info("Loading dataset")
+    if dataset_args is None:
+        dataset_args = dict()
     if not multi_gpu or comm.rank == 0:
         train_data = chainer.datasets.TransformDataset(
-            train_dataset,
+            train_dataset_cls(split="train", **dataset_args),
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
         test_data = chainer.datasets.TransformDataset(
-            test_dataset,
+            test_dataset_cls(split="test", **dataset_args),
             chainervr.datasets.SplitEpisode([in_episodes, out_episodes]))
     else:
         train_data = test_data = None
@@ -68,7 +71,7 @@ def train(model, train_chain,
         train_data = chainermn.scatter_dataset(
             train_data, comm, shuffle=True)
         test_data = chainermn.scatter_dataset(
-            test_data, comm, shuffle=True)
+            test_data, comm, shuffle=False)
     train_iter = chainer.iterators.MultiprocessIterator(
         train_data, batch_size, repeat=True, shuffle=True,
         n_processes=nprocs)

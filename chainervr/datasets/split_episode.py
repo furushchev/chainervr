@@ -7,6 +7,7 @@ class SplitEpisode(object):
     def __init__(self, num_episodes):
         assert isinstance(num_episodes, list)
         self.num_episodes = num_episodes
+        self.min_episodes = sum(num_episodes)
 
     def __call__(self, x):
         """x: (chainer.Variable, ndarray)
@@ -14,7 +15,7 @@ class SplitEpisode(object):
               where N is a number of frames of the episode.
         """
 
-        assert x.shape[0] >= sum(self.num_episodes), "invalid input: %s" % str(x.shape)
+        assert x.shape[0] >= self.min_episodes, "invalid input: %s" % str(x.shape)
 
         xs = []
         start = 0
