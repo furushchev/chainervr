@@ -27,11 +27,12 @@ def info(msg):
 
 def train(model, train_chain,
           train_dataset_cls, test_dataset_cls,
-          dataset_args,
           in_episodes, out_episodes,
           gpu, multi_gpu, out,
-          batch_size, max_iter, resume,
-          log_interval, snapshot_interval):
+          batch_size, max_iter,
+          log_interval, snapshot_interval,
+          dataset_args=None,
+          evaluate=None, resume=None):
 
     comm = None
     if multi_gpu:
@@ -90,10 +91,11 @@ def train(model, train_chain,
     trainer = training.Trainer(
         updater, (max_iter, "iteration"), out=out)
 
-    evaluator = extensions.Evaluator(test_iter, train_chain, device=gpu)
-    if multi_gpu:
-        evaluator = chainermn.create_multi_node_evaluator(evaluator, comm)
-    trainer.extend(evaluator)
+    if evaluate:
+        evaluator = extensions.Evaluator(test_iter, train_chain, device=gpu)
+        if multi_gpu:
+            evaluator = chainermn.create_multi_node_evaluator(evaluator, comm)
+        trainer.extend(evaluator)
 
     if not multi_gpu or comm.rank == 0:
         trainer.extend(extensions.LogReport(trigger=(log_interval, "iteration")))
