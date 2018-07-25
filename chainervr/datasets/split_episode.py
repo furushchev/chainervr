@@ -14,8 +14,7 @@ class SplitEpisode(object):
               where N is a number of frames of the episode.
         """
 
-        nframes = x.shape[0]
-        assert nframes >= sum(self.num_episodes)
+        assert x.shape[0] >= sum(self.num_episodes), "invalid input: %s" % str(x.shape)
 
         xs = []
         start = 0

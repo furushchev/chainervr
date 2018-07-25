@@ -12,9 +12,10 @@ class UCF101Dataset(chainer.dataset.DatasetMixin):
                  dataset_num=None, num_episodes=None,
                  with_class=False):
         if num_episodes is None:
-            num_episodes = 5
+            num_episodes = 10
 
-        dataset = utils.get_ucf101(split, n=dataset_num)
+        dataset = utils.get_ucf101(
+            split, npattern=dataset_num, nepisodes=num_episodes)
 
         self.root_dir = dataset["root_dir"]
         self.annotations = dataset["annotations"]
@@ -25,6 +26,7 @@ class UCF101Dataset(chainer.dataset.DatasetMixin):
         return self.annotations["filename"].shape[0]
 
     def get_example(self, i):
+        i = self.annotations.index[i]
         videoname = self.annotations["filename"][i]
         cls = self.annotations["class"][i]
         data = utils.load_episode(videoname,
