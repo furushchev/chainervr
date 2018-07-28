@@ -197,13 +197,13 @@ def detect(model_path, features_path, input_num, top_n,
 
     in_data = dataset[input_num][:in_episodes][np.newaxis, :]
     in_data = chainer.Variable(in_data)
-    if gpu > 0:
+    if gpu >= 0:
         with chainer.cuda.get_device_from_id(gpu):
             in_data.to_gpu()
 
     # forwarding
     _, _, hidden = model(in_data)
-    if gpu > 0:
+    if gpu >= 0:
         hidden.to_cpu()
     feature = hidden.array.reshape(-1)
 
