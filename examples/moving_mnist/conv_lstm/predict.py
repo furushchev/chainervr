@@ -19,8 +19,9 @@ def cli():
 @click.option("--disable-predict", is_flag=True)
 @click.argument("model_dir")
 @click.option("--image-num", type=int, default=0)
+@click.option("--skip-num", type=int, default=1)
 def summary(model_dir, gpu, in_episodes, out_episodes,
-            disable_predict, out, split, image_num):
+            disable_predict, out, split, image_num, skip_num):
     model = chainervr.models.ConvLSTM(
         n_channels=1, patch_size=(64, 64),
         predict=not disable_predict,
@@ -41,7 +42,8 @@ def summary(model_dir, gpu, in_episodes, out_episodes,
         in_episodes=in_episodes,
         out_episodes=out_episodes,
         out=out,
-        image_num=image_num)
+        image_num=image_num,
+        skip_num=skip_num)
 
 @cli.command()
 @click.argument("model_path")

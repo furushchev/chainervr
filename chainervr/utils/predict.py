@@ -91,7 +91,7 @@ def predict(model, model_path, dataset, gpu,
 
 def predict_summary(model, model_dir, dataset, gpu,
                     in_episodes, out_episodes,
-                    out, image_num):
+                    out, image_num, skip_num=None):
     if gpu >= 0:
         info("Using GPU %d" % gpu)
         chainer.cuda.get_device_from_id(gpu).use()
@@ -102,7 +102,10 @@ def predict_summary(model, model_dir, dataset, gpu,
     glob_ex = os.path.join(model_dir, "model_iter_")
     model_paths = glob.glob(glob_ex + "*")
     model_paths.sort(key=lambda s: int(s[len(glob_ex):]))
+    if skip_num is not None:
+        model_paths = model_paths[::skip_num]
     info("Found %d models" % len(model_paths))
+    
 
     data = dataset[image_num]
     in_data, next_data = data[:in_episodes], data[in_episodes:in_episodes+out_episodes]
