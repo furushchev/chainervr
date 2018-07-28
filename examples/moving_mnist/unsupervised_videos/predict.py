@@ -55,8 +55,9 @@ def predict(model_path, gpu, out, split, disable_predict, layers_num,
 @click.option("--disable-predict", is_flag=True)
 @click.option("--layers-num", type=int, default=2)
 @click.option("--image-num", type=int, default=0)
+@click.option("--skip-num", type=int, default=1)
 def summary(model_dir, gpu, out, split, disable_predict, layers_num,
-            in_episodes, out_episodes, image_num):
+            in_episodes, out_episodes, image_num, skip_num):
     model = chainervr.models.RPLSTM(
         n_channels=1, patch_size=(64, 64),
         n_layers=layers_num, predict=not disable_predict,
@@ -77,7 +78,8 @@ def summary(model_dir, gpu, out, split, disable_predict, layers_num,
         in_episodes=in_episodes,
         out_episodes=out_episodes,
         out=out,
-        image_num=image_num)
+        image_num=image_num,
+        skip_num=skip_num)
 
 
 if __name__ == '__main__':
