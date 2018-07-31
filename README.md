@@ -37,6 +37,26 @@ Rothfuss, Jonas, et al.
 arXiv preprint arXiv:1801.04134 (2018).
 ```
 
+## Install
+
+1. Clone this repository
+2. Install this package using `pip`
+
+``` bash
+cd chainervr
+pip install .
+```
+
+3. (Optional) If you plan to use with GPU, please install appropriate `cupy` package.
+
+``` bash
+pip install cupy-cuda91  # for CUDA 9.1
+# or
+pip install cupy-cuda92  # for CUDA 9.2
+# and so on.
+```
+
+
 ## Examples
 
 - [Reconstruction and Prediction of Moving Mnist Dataset](examples/moving_mnist)
