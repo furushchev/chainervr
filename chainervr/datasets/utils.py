@@ -76,7 +76,8 @@ def cached_download(url, cached_path=None):
             raise
 
     urlhash = hashlib.md5(url.encode('utf-8')).hexdigest()
-    cached_path = os.path.join(cache_root, urlhash)
+    if cached_path is None:
+        cached_path = os.path.join(cache_root, urlhash)
     lock_path = cached_path + ".lock"
 
     with filelock.FileLock(lock_path):
@@ -178,7 +179,8 @@ def cache_or_load_file(dataset, url, path, load, ext=None, cached_path=None, glo
         try:
             extract_archive(cached_path, dataset_dir, ext)
         except RuntimeError:
-            shutil.copy(cached_path, dataset_dir)
+            dest_path = os.path.join(dataset_dir, os.path.basename(path))
+            shutil.copy(cached_path, dest_path)
 
     if glob:
         return [load(p) for p in G.glob(path)]
