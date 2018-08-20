@@ -76,7 +76,8 @@ def cached_download(url, cached_path=None):
             raise
 
     urlhash = hashlib.md5(url.encode('utf-8')).hexdigest()
-    cached_path = os.path.join(cache_root, urlhash)
+    if cached_path is None:
+        cached_path = os.path.join(cache_root, urlhash)
     lock_path = cached_path + ".lock"
 
     with filelock.FileLock(lock_path):
